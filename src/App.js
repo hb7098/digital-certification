@@ -98,7 +98,7 @@ const FileUploader = () => {
   const initContract = async () => {
     if (web3) {
       try {
-        const instance = new web3.eth.Contract(MyTokenABI, "0xEd11Eb8C13652088Cfeb8aaD79D063f21fF32827");
+        const instance = new web3.eth.Contract(MyTokenABI, "0x062352112d9dC3D3171049e0E70707a5CA20d118");
         setContract(instance);
       } catch (error) {
         console.error('Error initializing contract:', error);
@@ -120,7 +120,7 @@ const FileUploader = () => {
       <div className="flex-image-container">
         <div className="certificate-image-container">
           <div className="image-description">
-          <h1 className="image-caption">Acquire Your Certificate Here</h1>
+          <h1 className="image-caption">Acquire Your Certificate</h1>
           <p className="image-elaboration">Download your certificates and mint them to your crypto wallet.</p>
           </div>
           <img className="certificate-image" src={certImage} alt="Foundry" width="500"/>
