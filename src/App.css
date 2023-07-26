@@ -1,38 +1,73 @@
-.App {
+/**Header styles*/
+.header{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  background-color: black;
+}
+.logo{
+  margin-left: 1rem;
+}
+.header-nav ul{
+  display: flex;
+}
+
+.nav-item{
+  margin-right: 1rem;
+  padding: 0rem .5rem;
+  list-style-type: none;
+}
+
+.nav-item a{
+  color: white;
+  text-decoration: none;
+}
+
+/**Certificate image styles*/
+.flex-image-container{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.certificate-image-container{
+  
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-template-columns: 1fr; 
+  justify-content: center;
+  padding-top: 2rem;
+}
+.image-description{
   text-align: center;
 }
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.image-caption{
+  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.image-elaboration{
+  font-weight: 500;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/**UI Styles*/
+.button-container{
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  width: 100%;
+  justify-content:space-around;
 }
 
-.App-link {
-  color: #61dafb;
+.button{
+  display: inline-block;
+  height: 3rem;
+  width: 8rem;
+  text-decoration: none;
+  font-weight: 600;
+  color: black;
+  background-color: #00CAFF;
+  border: none;
+  border-radius: 3rem;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.button:hover{
+  background-color: #0056b3;
 }
+

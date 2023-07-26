@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Header from './Header';
+import certImage from './foundry-certificate-image.PNG';
+import './App.css'
 import { Web3Storage } from 'web3.storage';
 import Web3 from 'web3'; // Import web3 library
 import { MyTokenABI } from './MyTokenABI'; // ABI
@@ -95,7 +98,7 @@ const FileUploader = () => {
   const initContract = async () => {
     if (web3) {
       try {
-        const instance = new web3.eth.Contract(MyTokenABI, "0xbfB0663028e2e3EA429B6626e6c746118d94C435");
+        const instance = new web3.eth.Contract(MyTokenABI, "0x2d049E47B4e9F95D280d6DEbe9a85Ac59c5457BF");
         setContract(instance);
       } catch (error) {
         console.error('Error initializing contract:', error);
@@ -113,24 +116,38 @@ const FileUploader = () => {
 
   return (
     <div>
-      <h2>IF2 7/19/2023 Demo ver. 1</h2>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={uploadFileToWeb3Storage} disabled={!file}>
-        Upload
-      </button>
-      <button onClick={handleMintToWallet} disabled={!contract || !cid || !web3}>
-        Mint to Wallet
-      </button>
-      {cid && (
-        <p>
-          File uploaded successfully! CID: {cid}
-        </p>
-      )}
-      {tokenId && (
-        <p>
-          Token minted successfully! Token ID: {web3.utils.hexToNumberString(tokenId)}
-        </p>
-      )}
+      <Header />
+      <div className="flex-image-container">
+        <div className="certificate-image-container">
+          <div className="image-description">
+          <h1 className="image-caption">Acquire Your Certificate Here</h1>
+          <p className="image-elaboration">Download your certificates and mint them to your crypto wallet.</p>
+          </div>
+          <img className="certificate-image" src={certImage} alt="Foundry" width="500"/>
+        </div>
+      </div>
+      
+      <h2 className="demo-version">IF2 7/26/2023 Demo ver. 2</h2>
+      <div className="button-container">
+        <input className="file-input" type="file" onChange={handleFileChange} />
+        
+        <button className="button"onClick={uploadFileToWeb3Storage} disabled={!file}>
+          Upload
+        </button>
+        <button className="button"onClick={handleMintToWallet} disabled={!contract || !cid || !web3}>
+          Mint to Wallet
+        </button>
+        {cid && (
+          <p>
+            File uploaded successfully! CID: {cid}
+          </p>
+        )}
+        {tokenId && (
+          <p>
+            Token minted successfully! Token ID: {web3.utils.hexToNumberString(tokenId)}
+          </p>
+        )}
+      </div>
     </div>
   );
 };
