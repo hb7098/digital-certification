@@ -98,7 +98,7 @@ const FileUploader = () => {
   const initContract = async () => {
     if (web3) {
       try {
-        const instance = new web3.eth.Contract(MyTokenABI, "0x2d049E47B4e9F95D280d6DEbe9a85Ac59c5457BF");
+        const instance = new web3.eth.Contract(MyTokenABI, "0xEd11Eb8C13652088Cfeb8aaD79D063f21fF32827");
         setContract(instance);
       } catch (error) {
         console.error('Error initializing contract:', error);
@@ -137,17 +137,20 @@ const FileUploader = () => {
         <button className="button"onClick={handleMintToWallet} disabled={!contract || !cid || !web3}>
           Mint to Wallet
         </button>
-        {cid && (
-          <p>
-            File uploaded successfully! CID: {cid}
-          </p>
-        )}
-        {tokenId && (
-          <p>
-            Token minted successfully! Token ID: {web3.utils.hexToNumberString(tokenId)}
-          </p>
-        )}
+        
       </div>
+      <div className="response-container">
+          {cid && (
+            <p className="response">
+              File uploaded successfully! CID: {cid}
+            </p>
+          )}
+          {tokenId && (
+            <p className="response">
+              Token minted successfully! Token ID: {web3.utils.hexToNumberString(tokenId)}
+            </p>
+          )}
+        </div>
     </div>
   );
 };
