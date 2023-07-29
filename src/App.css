@@ -72,6 +72,10 @@
 .button:hover{
   background-color: #0056b3;
 }
+.button:disabled{
+  background-color: gainsboro;
+  color: gray;
+}
 
 .response-container{
   display: block;
