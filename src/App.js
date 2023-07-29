@@ -6,37 +6,39 @@ import { Web3Storage } from 'web3.storage';
 import Web3 from 'web3'; // Import web3 library
 import { MyTokenABI } from './MyTokenABI'; // ABI
 import { PDFDocument, StandardFonts } from 'pdf-lib';
+g
+const ethers = require("ethers");
 
 const fontSize = 20;
+
 const customerArray = [
   {
     name : "Kirsty Gallegos",
     cert : ["RIT Bachelor's in Computer Engineering", "RIT Master's in Computer Engineering"],
-    addr : "0xd2e0b2B169dA724B5FBE871Cb9a620e2Ad4f3FdB"
+    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
   },
   {
     name : "Miranda Salazar",
     cert : ["RIT Bachelor's in Computer Science", "RIT Master's in Computer Science"],
-    addr : "0x0Bc4681A4AA63D48CBaf023390Bf29b0913cd693"
+    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
   },
   {
     name : "Fahad Mora",
     cert : ["RIT Bachelor's in Cyber Security"],
-    addr : "0xec8D531aCb10b257da230A0c5B31Dd433aA43cC6"
+    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
   },
   {
     name : "Evie Fitzpatrick",
     cert : ["RIT Bachelor's in Electrical Engineering", "RIT Master's in Electrical Engineering"],
-    addr : "0x1D504096f8d25821E9e52d894b6fdefCAB63EA95"
+    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
   },
   {
     name : "Dewi Obrien",
     cert : ["RIT Bachelor's in Mechanical Engineering", "RIT Master's in Mechanical Engineering"],
-    addr : "0xFFcf980D81B285B8013B5A6629b20192B64F02Ff"
+    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
   }
 ]
 var selectedCustomer;
-
 
 // main function starts
 const FileUploader = () => {
@@ -144,6 +146,7 @@ const FileUploader = () => {
     try {
       const tokenId = await getTransferEventLogs(transactionHash);
       setTokenId(tokenId);
+      console.log("Retrieved");
     } catch (error) {
       console.error('Error retrieving tokenId:', error);
     }
@@ -176,15 +179,15 @@ const FileUploader = () => {
 
   const handleMintToWallet = async () => {
     try {
-      if (contract && cid && web3) {
+      if (true) {
         const customer = customerArray.find((customer) => customer.name === selectedCustomer);
         const recipient = customer.addr;
   
         console.log("Recipient:", recipient);
         console.log("CID:", cid);
-  
         // Mint the token to the recipient's address
-        const transaction = await contract.methods.mintToken(recipient, cid).send({ from: recipient, gas : 999999});
+        const transaction = await contract.methods.mintToken(recipient, cid).send({ from: recipient });
+        console.log("Transaction");
         retrieveTokenId(transaction.transactionHash);
       }
 
@@ -193,16 +196,27 @@ const FileUploader = () => {
     }
   };
 
+  const connectAccount = async() => {
+    if (window.ethereum) {
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+    }
+  }
   const initWeb3 = async () => {
-    const web3Instance = new Web3('http://localhost:7545'); // Connect to Ganache RPC endpoint
-    setWeb3(web3Instance);
+
+    // const web3Instance = new Web3('https://ethereum-goerli.publicnode.com	'); // Connect to Ganache RPC endpoint
+    // setWeb3(web3Instance);
   };
 
   const initContract = async () => {
-    if (web3) {
+    if (true) {
       try {
-        const instance = new web3.eth.Contract(MyTokenABI, "0x356b8120103b5cA6B5e7d615E5b684924569c431");
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = provider.getSigner();
+        const instance = new provider.eth.Contract(MyTokenABI, "0xAFA7564C9B1A150a6fd83907d6748c06b2f50d1e", signer);
         setContract(instance);
+        console.log(contract);
       } catch (error) {
         console.error('Error initializing contract:', error);
       }
@@ -242,9 +256,10 @@ const FileUploader = () => {
         <button className="button"onClick={uploadFileToWeb3Storage}>
           Upload
         </button>
-        <button className="button"onClick={handleMintToWallet} disabled={!contract || !cid || !web3}>
+        <button className="button"onClick={handleMintToWallet}>
           Mint to Wallet
         </button>
+        <button className="button"onClick={connectAccount}>Connect!</button>
       </div>
 
       <div className="response-container">
