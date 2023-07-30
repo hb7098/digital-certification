@@ -3,10 +3,10 @@ import Header from './Header';
 import certImage from './foundry-certificate-image.PNG';
 import './App.css'
 import { Web3Storage } from 'web3.storage';
-import Web3 from 'web3'; // Import web3 library
+import { Web3, validator} from 'web3'; // Import web3 library
 import { MyTokenABI } from './MyTokenABI'; // ABI
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-g
+
 const ethers = require("ethers");
 
 const fontSize = 20;
@@ -43,6 +43,8 @@ var selectedCustomer;
 // main function starts
 const FileUploader = () => {
 
+  const [status, setStatus] = useState('');
+  const [account, setAccount] = useState('');
   const [cid, setCID] = useState('');
   const [web3, setWeb3] = useState(null);
   const [contract, setContract] = useState(null);
@@ -86,7 +88,7 @@ const FileUploader = () => {
         size: fontSize,
         font
       });
-
+      
       const customer = customerArray.find((customer) => customer.name === selectedCustomer);
       for (let i = 0; i < customer.cert.length; i++) {
         width = font.widthOfTextAtSize(customer.cert[i].toString(), fontSize);
@@ -116,8 +118,24 @@ const FileUploader = () => {
   // filtering out transfer event log to grab the tokenId 
   const getTransferEventLogs = async (transactionHash) => {
     try {
-      const receipt = await web3.eth.getTransactionReceipt(transactionHash);
-  
+      var receipt;
+      while (true) {
+        console.log("hash: ", transactionHash);
+        receipt = await window.ethereum.request({
+          method: 'eth_getTransactionReceipt',
+          params: [transactionHash],
+        });
+
+        if (receipt) {
+          console.log("received receipt:", receipt);
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 3000));  // wait 3 seconds
+      }
+
+      // const receipt = await web3.eth.getTransactionReceipt(transactionHash);
+
       // Get the contract address from the receipt
       const contractAddress = receipt.to;
   
@@ -130,11 +148,15 @@ const FileUploader = () => {
       };
   
       // Fetch the logs using the filter
-      const logs = await web3.eth.getPastLogs(filter);
+      const logs = await window.ethereum.request({
+           method: 'eth_getLogs', 
+           params: [filter], 
+      });
   
       // Process the logs to get the tokenId
       const tokenId = logs[0]?.topics[3]; // tokenId is the 4th topic in the Transfer event
-  
+      console.log("Retrieved : ", tokenId);
+
       return tokenId;
     } catch (error) {
       console.error('Error retrieving Transfer event logs:', error);
@@ -186,9 +208,20 @@ const FileUploader = () => {
         console.log("Recipient:", recipient);
         console.log("CID:", cid);
         // Mint the token to the recipient's address
-        const transaction = await contract.methods.mintToken(recipient, cid).send({ from: recipient });
-        console.log("Transaction");
-        retrieveTokenId(transaction.transactionHash);
+        console.log("Contract:", contract);
+        const txParam = {
+          to: "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036",
+          from: window.ethereum.selectedAddress,
+          'data': contract.methods.mintToken(window.ethereum.selectedAddress, cid).encodeABI(),
+        };
+    
+        const txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [txParam],
+        });
+        
+        console.log(txHash);
+        retrieveTokenId(txHash);
       }
 
     } catch (error) {
@@ -204,19 +237,25 @@ const FileUploader = () => {
     }
   }
   const initWeb3 = async () => {
+    const web3Instance = new Web3('https://rpc.sepolia.dev'); // Connect to Ganache RPC endpoint
+    var privateKeyString = '23f2da6da69a9708b0fd8c58a6a9b6f2d3e407d9d9dbde861d7a34a90930cf0a';
+    privateKeyString = web3Instance.utils.sha3(privateKeyString);
+    const account = web3Instance.eth.accounts.wallet.add(privateKeyString);
+    const isValidPrivateKey = validator.isHexStrict(privateKeyString) && privateKeyString.length === 64;
+    console.log('Is Valid Private Key:', isValidPrivateKey);
 
-    // const web3Instance = new Web3('https://ethereum-goerli.publicnode.com	'); // Connect to Ganache RPC endpoint
-    // setWeb3(web3Instance);
+    // setAccount(account);
+    setWeb3(web3Instance);
   };
 
   const initContract = async () => {
-    if (true) {
+    if (web3) {
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = provider.getSigner();
-        const instance = new provider.eth.Contract(MyTokenABI, "0xAFA7564C9B1A150a6fd83907d6748c06b2f50d1e", signer);
+        console.log("checking signer: ", signer);
+        const instance = new web3.eth.Contract(MyTokenABI, "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036", signer);
         setContract(instance);
-        console.log(contract);
       } catch (error) {
         console.error('Error initializing contract:', error);
       }
@@ -273,6 +312,13 @@ const FileUploader = () => {
               Token minted successfully! Token ID: {web3.utils.hexToNumberString(tokenId)}
             </p>
           )}
+
+          <br>
+          </br>
+
+          <p id = "status">
+            {status}
+          </p>
         </div>
     </div>
   );
