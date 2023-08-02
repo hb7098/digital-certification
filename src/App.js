@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
-import certImage from './foundry-certificate-image.PNG';
+import certImage from './foundrylogo.PNG';
 import './App.css'
 import { Web3Storage } from 'web3.storage';
 import Web3 from 'web3'; // Import web3 library
@@ -224,11 +224,12 @@ const FileUploader = () => {
       <Header />
       <div className="flex-image-container">
         <div className="certificate-image-container">
+        <img className="certificate-image" src={certImage} alt="Foundry" width="500"/>
           <div className="image-description">
           <h1 className="image-caption">Acquire Your Certificate</h1>
           <p className="image-elaboration">Download your certificates and mint them to your crypto wallet.</p>
           </div>
-          <img className="certificate-image" src={certImage} alt="Foundry" width="500"/>
+          
         </div>
       </div>
 
@@ -242,7 +243,7 @@ const FileUploader = () => {
         <button className="button"onClick={uploadFileToWeb3Storage}>
           Upload
         </button>
-        <button className="button"onClick={handleMintToWallet} disabled={!contract || !cid || !web3}>
+        <button className="mint-button"onClick={handleMintToWallet} disabled={!contract || !cid || !web3}>
           Mint to Wallet
         </button>
       </div>
