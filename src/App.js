@@ -313,19 +313,13 @@ const FileUploader = () => {
 
   const connectAccount = async() => {
     if (window.ethereum) {
-      const accounts = await window.ethereum.request({
+      await window.ethereum.request({
         method: "eth_requestAccounts",
       });
     }
   }
   const initWeb3 = async () => {
     const web3Instance = new Web3('https://rpc.sepolia.dev'); // Connect to Ganache RPC endpoint
-    // var privateKeyString = '23f2da6da69a9708b0fd8c58a6a9b6f2d3e407d9d9dbde861d7a34a90930cf0a';
-    // privateKeyString = web3Instance.utils.sha3(privateKeyString);
-    // const account = web3Instance.eth.accounts.wallet.add(privateKeyString);
-    // const isValidPrivateKey = validator.isHexStrict(privateKeyString) && privateKeyString.length === 64;
-    // console.log('Is Valid Private Key:', isValidPrivateKey);
-    // setAccount(account);
     setWeb3(web3Instance);
   };
 
@@ -334,7 +328,6 @@ const FileUploader = () => {
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = provider.getSigner();
-        console.log("checking signer: ", signer);
         const instance = new web3.eth.Contract(MyTokenABI, "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036", signer);
         setContract(instance);
       } catch (error) {
@@ -377,7 +370,7 @@ const FileUploader = () => {
         <button className="button"onClick={uploadFileToWeb3Storage}>
           Upload
         </button>
-        <button className="button"onClick={handleMintToWallet}>
+        <button className="button"onClick={handleMintToWallet} disabled={!cid}>
           Mint to Wallet
         </button>
         <button className="button"onClick={connectAccount}>Connect!</button>
