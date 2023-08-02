@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import certImage from './foundrylogo.PNG';
 import './App.css'
-import { Web3Storage } from 'web3.storage';
 import { Web3 } from 'web3'; // Import web3 library
 import { MyTokenABI } from './MyTokenABI'; // ABI
 import { PDFDocument, StandardFonts } from 'pdf-lib';
@@ -73,8 +72,6 @@ const FileUploader = () => {
   const [web3, setWeb3] = useState(null);
   const [contract, setContract] = useState(null);
   const [tokenId, setTokenId] = useState('');
-  const [jpg, setjpg] = useState('');
-
 
   // uploadFileToWeb3Storage
   // PDF Creation & Uploading to web3.storage
@@ -203,8 +200,6 @@ const FileUploader = () => {
 
         await new Promise((resolve) => setTimeout(resolve, 3000));  // wait 3 seconds
       }
-
-      // const receipt = await web3.eth.getTransactionReceipt(transactionHash);
 
       // Get the contract address from the receipt
       const contractAddress = receipt.to;
