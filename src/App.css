@@ -68,10 +68,30 @@
   border: none;
   border-radius: 3rem;
 }
+.mint-button{
+  display: inline-block;
+  height: 3rem;
+  width: 8rem;
+  text-decoration: none;
+  font-weight: 600;
+  color: black;
+  background-color: #00E67E;
+  border: none;
+  border-radius: 3rem;
+}
 
 .button:hover{
   background-color: #0056b3;
 }
+.mint-button:hover{
+  background-color: #0056b3;
+}
+
+.mint-button:disabled{
+  background-color: gainsboro;
+  color: gray;
+}
+
 
 .response-container{
   display: block;
