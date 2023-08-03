@@ -8,7 +8,7 @@ function Header() {
         <img className="logo" src={logo} alt="Foundry"/>
         <nav className="header-nav">
             <ul>
-                <li className="nav-item"><a href="#">Home</a></li>
+                <li className="nav-item"><a href="localhost:3000">Home</a></li>
                 <li className="nav-item"><a href="#">About</a></li>
             </ul>
         </nav>
