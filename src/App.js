@@ -7,6 +7,7 @@ import { MyTokenABI } from './MyTokenABI'; // ABI
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { NFTStorage, File } from 'nft.storage';
 import workerSrc from 'pdfjs-dist/build/pdf.worker.entry';
+import { upload } from '@testing-library/user-event/dist/upload';
 const pdfjsLib = require ("pdfjs-dist");
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
@@ -18,7 +19,7 @@ const customerArray = [
   {
     name : "Kirsty Gallegos",
     cert : ["RIT Bachelor's in Computer Engineering", "RIT Master's in Computer Engineering"],
-    addr : "0x234f5811e02C85f1cB28D5088d6Ff0D29E72323B"
+    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
   },
   {
     name : "Miranda Salazar",
@@ -73,42 +74,43 @@ const FileUploader = () => {
   const [contract, setContract] = useState(null);
   const [tokenId, setTokenId] = useState('');
 
-  // uploadFileToWeb3Storage
   // PDF Creation & Uploading to web3.storage
-  const uploadFileToWeb3Storage = async () => {
+  const uploadFile = async () => {
     try {
+      console.log("UploadFile");
 
       //PDF Creation 
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage([1000, 500]);
-      const imageFetch = await fetch("https://i.imgur.com/UsXM1ph.png");  // foundry logo on imgur
+      const imageFetch = await fetch("https://i.imgur.com/8L3QLdz.png");  // foundry logo on imgur
 
       const imageData = await imageFetch.arrayBuffer();
       const image = await pdfDoc.embedPng(imageData);
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+      const fontCert = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
-      var {width, height} = image.size();
+      var {width, height} = image.size(); // var 'heigh' is not used
       var centerX = (page.getWidth() - width) / 2;
       page.drawImage(image, {
         x: centerX,
-        y: 400
+        y: 350
       });
 
-      width = font.widthOfTextAtSize("Certificate of Completion", fontSize);
+      width = font.widthOfTextAtSize("Certificate of Completion", fontSize + 3);
       centerX = (page.getWidth() - width) / 2;
       page.drawText("Certificate of Completion", {
         x: centerX,
-        y: 330,
-        size: fontSize,
-        font
+        y: 280,
+        size: fontSize + 3,
+        fontCert
       });
 
-      width = font.widthOfTextAtSize(selectedCustomer.toString(), fontSize);
+      width = font.widthOfTextAtSize(selectedCustomer.toString(), fontSize + 2);
       centerX = (page.getWidth() - width) / 2;
       page.drawText(selectedCustomer.toString(), {
         x: centerX,
-        y: 310,
-        size: fontSize,
+        y: 220,
+        size: fontSize + 2,
         font
       });
       
@@ -118,7 +120,7 @@ const FileUploader = () => {
         centerX = (page.getWidth() - width) / 2;
         page.drawText(customer.cert[i].toString(), {
           x: centerX,
-          y: 290 - i * 20,
+          y: 180 - i * 20,
           size: fontSize,
           font
         });
@@ -142,41 +144,38 @@ const FileUploader = () => {
           token : NFT_STORAGE_KEY
         });
         
-        if (pdfUpload) {
-          const returnedData = await nftstorage.store({
-            name: 'Certificate for ' + selectedCustomer,
-            description: 'Description',
-            image: pdfUpload,
-          });
-          console.log(returnedData);
-          console.log('IPFS URL for the metadata:', returnedData.url)
-          console.log('metadata.json contents:\n', returnedData.data)
-          setCID(returnedData.url);
-        }
+        const returnedData = await nftstorage.store({
+          name: 'Certificate for ' + selectedCustomer,
+          description: 'Description',
+          image: pdfUpload,
+        });
+
+        console.log(returnedData);
+        console.log('IPFS URL for the metadata:', returnedData.url)
+        console.log('metadata.json contents:\n', returnedData.data)
+        setCID(returnedData.url);
+        const customer = customerArray.find((customer) => customer.name === selectedCustomer);
+        const recipient = customer.addr;
+  
+        console.log("Recipient:", recipient);
+        console.log("CID:", returnedData.url);
+        // Mint the token to the recipient's address
+        console.log("Contract:", contract);
+        const txParam = {
+          to: "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036",
+          from: window.ethereum.selectedAddress,
+          'data': contract.methods.mintToken(customer.addr, returnedData.url).encodeABI(),
+        };
+    
+        const txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [txParam],
+        });
+        
+        console.log(txHash);
+        retrieveTokenId(txHash);
       })
 
-
-      // const pdfUpload = new File([pdfBytes], 'example.pdf', { type : 'application/pdf'});
-      // const imageUpload = new File([fetchimage], 'fetchedimage.jpg');
-      // Upload to web3.storage - deprecated
-      // Change apikey as needed
-      // const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEU2ODU2MThDRDRkNzg1NTFkMTY5NzU4MzhEMTNGQ0JkMzZlNTlGYWEiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2ODk0NzYxNDkyMTYsIm5hbWUiOiJJRiJ9.qhmsZBWTLWcv1Gp3pVp9evzCm3wVOZ1gbV1uNP4l9uo'; // Replace with your web3.storage API key
-      // const client = new Web3Storage({ token: apiKey });
-      // const PDFcid = await client.put([pdfUpload]);
-      // console.log("PDF uploaded. CID : ", PDFcid);
-      // const metaData = {
-      //   name : "testing certificate for " + selectedCustomer,
-      //   description : "this is a testing certificate",
-      //   image : "ipfs://" + PDFcid
-      // }
-      // console.log(metaData);
-      // const jsonString = JSON.stringify(metaData);
-      // const metaDataUpload = new Blob([jsonString], { type : 'application/json' });
-      // const metaDataCID = await client.put([metaDataUpload], 'metadata.json');
-      // console.log("metadata uploaded. CID : ", metaDataCID);
-      // setCID(metaDataCID);
-
-      
     } catch (error) {
       console.error('Error uploading file to web3.storage:', error);
     }
@@ -276,35 +275,36 @@ const FileUploader = () => {
     console.log("Selected customer:", selectedCustomer);
   }
 
+  //deprecated
   const handleMintToWallet = async () => {
+    console.log("Handle");
+    await uploadFile();
     try {
-      if (true) {
-        const customer = customerArray.find((customer) => customer.name === selectedCustomer);
-        const recipient = customer.addr;
-  
-        console.log("Recipient:", recipient);
-        console.log("CID:", cid);
-        // Mint the token to the recipient's address
-        console.log("Contract:", contract);
-        const txParam = {
-          to: "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036",
-          from: window.ethereum.selectedAddress,
-          'data': contract.methods.mintToken(customer.addr, cid).encodeABI(),
-        };
-    
-        const txHash = await window.ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [txParam],
-        });
-        
-        console.log(txHash);
-        retrieveTokenId(txHash);
-      }
+      const customer = customerArray.find((customer) => customer.name === selectedCustomer);
+      const recipient = customer.addr;
 
-    } catch (error) {
-      console.error('Error minting token to wallet:', error);
+      console.log("Recipient:", recipient);
+      console.log("CID:", cid);
+      // Mint the token to the recipient's address
+      console.log("Contract:", contract);
+      const txParam = {
+        to: "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036",
+        from: window.ethereum.selectedAddress,
+        'data': contract.methods.mintToken(customer.addr, cid).encodeABI(),
+      };
+  
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [txParam],
+      });
+      
+      console.log(txHash);
+      retrieveTokenId(txHash);
     }
-  };
+    catch(error) {
+      console.error('Error minting token to wallet:', error);
+    };
+ };
 
   const connectAccount = async() => {
     if (window.ethereum) {
@@ -362,13 +362,13 @@ const FileUploader = () => {
         <div id = "dropdownContainer">
         </div>
         
-        <button className="button"onClick={uploadFileToWeb3Storage}>
+        <button className="button"onClick={uploadFile}>
           Upload
         </button>
-        <button className="button"onClick={handleMintToWallet} disabled={!cid}>
-          Mint to Wallet
-        </button>
-        <button className="button"onClick={connectAccount}>Connect!</button>
+        {/* <button className="button"onClick={handleMintToWallet}>
+          Upload
+        </button> */}
+        {/* <button className="button"onClick={connectAccount}>Connect!</button> */}
       </div>
 
       <div className="response-container">
