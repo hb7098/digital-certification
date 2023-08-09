@@ -7,46 +7,24 @@ import { MyTokenABI } from './MyTokenABI'; // ABI
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { NFTStorage, File } from 'nft.storage';
 import workerSrc from 'pdfjs-dist/build/pdf.worker.entry';
-import { upload } from '@testing-library/user-event/dist/upload';
 const pdfjsLib = require ("pdfjs-dist");
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
 const ethers = require("ethers");
-const NFT_STORAGE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDMyYTQzZDkxQTlhZDNFMTg2N2EwMzM1NUEwQzIwYTUwNTgyYjVFMkMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY5MDc2NjQ0NjQxOSwibmFtZSI6IktleTEifQ.LVhaSrgeiumXeTjI7JzhMRjjLOW7P1xU36KPdgTz2HY";
+const NFT_STORAGE_KEY = // fill it with nft.storage API key
+const SMART_CONTRACT_ADDR = // fill it with smart contract address
 const fontSize = 20;
 
 const customerArray = [
   {
-    name : "Kirsty Gallegos",
-    cert : ["RIT Bachelor's in Computer Engineering", "RIT Master's in Computer Engineering"],
-    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
-  },
-  {
-    name : "Miranda Salazar",
-    cert : ["RIT Bachelor's in Computer Science", "RIT Master's in Computer Science"],
-    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
-  },
-  {
-    name : "Fahad Mora",
-    cert : ["RIT Bachelor's in Cyber Security"],
-    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
-  },
-  {
-    name : "Evie Fitzpatrick",
-    cert : ["RIT Bachelor's in Electrical Engineering", "RIT Master's in Electrical Engineering"],
-    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
-  },
-  {
-    name : "Dewi Obrien",
-    cert : ["RIT Bachelor's in Mechanical Engineering", "RIT Master's in Mechanical Engineering"],
-    addr : "0x39D28E1A30c8C2b0C208D0714ae6a09Fc97261Ce"
+    name : // fill it with customer 
+    cert : // fill it with customer certification. current implementation takes array of strings
+    addr : // fill it with customer public key 
   }
 ]
 var selectedCustomer;
 
 function dataURItoBlob(dataURI) {
-  // const byteString = atob(dataURI.split(',')[1]);
-  // const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
   const base64Index = dataURI.indexOf(';base64,');
   if (base64Index === -1) {
     throw new Error('Invalid data URI: Missing ";base64,"');
@@ -65,9 +43,8 @@ function dataURItoBlob(dataURI) {
 }
 
 // main function starts
-const FileUploader = () => {
+const CertificateUploader = () => {
   const [status, setStatus] = useState('');
-  const [account, setAccount] = useState('');
   const [cid, setCID] = useState('');
   const [web3, setWeb3] = useState(null);
   const [contract, setContract] = useState(null);
@@ -76,8 +53,6 @@ const FileUploader = () => {
   // PDF Creation & Uploading to web3.storage
   const uploadFile = async () => {
     try {
-      console.log("UploadFile");
-
       //PDF Creation 
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage([1000, 500]);
@@ -88,7 +63,8 @@ const FileUploader = () => {
       const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
       const fontCert = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
-      var {width, height} = image.size(); // var 'heigh' is not used
+      // Constructing PDF 
+      var {width, height} = image.size(); // var 'height' is not used
       var centerX = (page.getWidth() - width) / 2;
       page.drawImage(image, {
         x: centerX,
@@ -125,7 +101,9 @@ const FileUploader = () => {
         });
       }
       const pdfBytes = await pdfDoc.save();
+      // Constructing PDF ends
 
+      // Changing PDF to JPG
       const loadingTask = pdfjsLib.getDocument(pdfBytes);
       const canvas = document.createElement("canvas");
       const pdfDocument = await loadingTask.promise;
@@ -149,21 +127,26 @@ const FileUploader = () => {
           image: pdfUpload,
         });
 
-        console.log(returnedData);
-        console.log('IPFS URL for the metadata:', returnedData.url)
-        console.log('metadata.json contents:\n', returnedData.data)
+        // Debug lines
+        // console.log(returnedData);
+        // console.log('IPFS URL for the metadata:', returnedData.url)
+        // console.log('metadata.json contents:\n', returnedData.data)
         setCID(returnedData.url);
+        // Changing PDF to JPG ends
+
+        // Minting begins
         const customer = customerArray.find((customer) => customer.name === selectedCustomer);
         const recipient = customer.addr;
   
-        console.log("Recipient:", recipient);
-        console.log("CID:", returnedData.url);
-        // Mint the token to the recipient's address
-        console.log("Contract:", contract);
+        // Debug lines
+        // console.log("Recipient:", recipient);
+        // console.log("CID:", returnedData.url);
+        // console.log("Contract:", contract);
+
         const txParam = {
-          to: "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036",
+          to: SMART_CONTRACT_ADDR,
           from: window.ethereum.selectedAddress,
-          'data': contract.methods.mintToken(customer.addr, returnedData.url).encodeABI(),
+          'data': contract.methods.mintToken(recipient, returnedData.url).encodeABI(),
         };
     
         const txHash = await window.ethereum.request({
@@ -171,12 +154,14 @@ const FileUploader = () => {
           params: [txParam],
         });
         
-        console.log(txHash);
+        // Debug line
+        // console.log(txHash);
         retrieveTokenId(txHash);
+        // Minting ends
       })
 
     } catch (error) {
-      console.error('Error uploading file to web3.storage:', error);
+      console.error('Error uploading file :', error);
     }
   };
 
@@ -185,18 +170,19 @@ const FileUploader = () => {
     try {
       var receipt;
       while (true) {
-        console.log("hash: ", transactionHash);
+        // Debug line
+        // console.log("hash: ", transactionHash);
         receipt = await window.ethereum.request({
           method: 'eth_getTransactionReceipt',
           params: [transactionHash],
         });
 
         if (receipt) {
-          console.log("received receipt:", receipt);
+          // console.log("received receipt:", receipt);
           break;
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 3000));  // wait 3 seconds
+        await new Promise((resolve) => setTimeout(resolve, 3000));  // wait 3 seconds and check receipt again
       }
 
       // Get the contract address from the receipt
@@ -218,9 +204,8 @@ const FileUploader = () => {
   
       // Process the logs to get the tokenId
       const tokenId = logs[0]?.topics[3]; // tokenId is the 4th topic in the Transfer event
-      //testing
       const txParam = {
-        to: "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036",
+        to: SMART_CONTRACT_ADDR,
         'data': contract.methods.ownerOf(tokenId).encodeABI(),
       };
   
@@ -228,11 +213,8 @@ const FileUploader = () => {
         method: 'eth_call',
         params: [txParam],
       });
-
-      console.log("Testing returned : ", txHash);
-      //testing ends
-
       return tokenId;
+
     } catch (error) {
       console.error('Error retrieving Transfer event logs:', error);
       return null;
@@ -243,7 +225,8 @@ const FileUploader = () => {
     try {
       const tokenId = await getTransferEventLogs(transactionHash);
       setTokenId(tokenId);
-      console.log("Retrieved");
+      // Debug line
+      // console.log("Retrieved");
     } catch (error) {
       console.error('Error retrieving tokenId:', error);
     }
@@ -271,47 +254,8 @@ const FileUploader = () => {
   // Event handler for selection change
   function handleSelectionChange(event) {
     selectedCustomer = event.target.value;
-    console.log("Selected customer:", selectedCustomer);
   }
 
-  //deprecated
-  const handleMintToWallet = async () => {
-    console.log("Handle");
-    await uploadFile();
-    try {
-      const customer = customerArray.find((customer) => customer.name === selectedCustomer);
-      const recipient = customer.addr;
-
-      console.log("Recipient:", recipient);
-      console.log("CID:", cid);
-      // Mint the token to the recipient's address
-      console.log("Contract:", contract);
-      const txParam = {
-        to: "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036",
-        from: window.ethereum.selectedAddress,
-        'data': contract.methods.mintToken(customer.addr, cid).encodeABI(),
-      };
-  
-      const txHash = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [txParam],
-      });
-      
-      console.log(txHash);
-      retrieveTokenId(txHash);
-    }
-    catch(error) {
-      console.error('Error minting token to wallet:', error);
-    };
- };
-
-  const connectAccount = async() => {
-    if (window.ethereum) {
-      await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-    }
-  }
   const initWeb3 = async () => {
     const web3Instance = new Web3('https://rpc.sepolia.dev'); // Connect to Ganache RPC endpoint
     setWeb3(web3Instance);
@@ -322,7 +266,7 @@ const FileUploader = () => {
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = provider.getSigner();
-        const instance = new web3.eth.Contract(MyTokenABI, "0x12068e7a7e2755b46AcffcB9933Ae0Ca519B2036", signer);
+        const instance = new web3.eth.Contract(MyTokenABI, SMART_CONTRACT_ADDR, signer);
         setContract(instance);
       } catch (error) {
         console.error('Error initializing contract:', error);
@@ -365,10 +309,7 @@ const FileUploader = () => {
         <button className="button"onClick={uploadFile}>
           Upload
         </button>
-        {/* <button className="button"onClick={handleMintToWallet} disabled={!cid}>
-          Mint to Wallet
-        </button>
-        <button className="button"onClick={connectAccount}>Connect!</button> */}
+
       </div>
 
         <div className="response-container">
@@ -379,7 +320,7 @@ const FileUploader = () => {
             )}
             {tokenId && (
               <p className="response">
-                Token minted successfully! Token ID: {web3.utils.hexToNumberString(tokenId)}
+                Token minted successfully! Token`ID: {web3.utils.hexToNumberString(tokenId)}
               </p>
             )}
 
@@ -395,4 +336,4 @@ const FileUploader = () => {
   );
 };
 
-export default FileUploader;
+export default CertificateUploader;
