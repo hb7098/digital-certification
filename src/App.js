@@ -363,7 +363,7 @@ const FileUploader = () => {
         <div id = "dropdownContainer">
         </div>
         
-        <button className="button"onClick={uploadFileToWeb3Storage}>
+        <button className="button"onClick={uploadFile}>
           Upload
         </button>
         {/* <button className="button"onClick={handleMintToWallet} disabled={!cid}>
