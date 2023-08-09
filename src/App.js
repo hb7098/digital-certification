@@ -344,52 +344,54 @@ const FileUploader = () => {
   return (
     <div>
       <Header />
-      <div className="flex-image-container">
-        <div className="certificate-image-container">
-        <img className="certificate-image" src={certImage} alt="Foundry" width="500"/>
-          <div className="image-description">
-          <h1 className="image-caption">Acquire Your Certificate</h1>
-          <p className="image-elaboration">Download your certificates and mint them to your crypto wallet.</p>
+      <div className="body">
+        <div className="flex-image-container">
+          <div className="certificate-image-container">
+            <img className="certificate-image" src={certImage} alt="Foundry" width="500"/>
+            <div className="image-description">
+              <h1 className="image-caption">Acquire Your Certificate</h1>
+              <p className="image-elaboration">Download your certificates and mint them to your crypto wallet.</p>
+            </div>
+            
           </div>
-          
         </div>
-      </div>
 
-      <br>
-      </br>
+        <br>
+        </br>
 
       <div className="button-container">
         <div id = "dropdownContainer">
         </div>
         
-        <button className="button"onClick={uploadFile}>
+        <button className="button"onClick={uploadFileToWeb3Storage}>
           Upload
         </button>
-        {/* <button className="button"onClick={handleMintToWallet}>
-          Upload
-        </button> */}
-        {/* <button className="button"onClick={connectAccount}>Connect!</button> */}
+        {/* <button className="button"onClick={handleMintToWallet} disabled={!cid}>
+          Mint to Wallet
+        </button>
+        <button className="button"onClick={connectAccount}>Connect!</button> */}
       </div>
 
-      <div className="response-container">
-          {cid && (
-            <p className="response">
-              File uploaded successfully! CID: {cid}
-            </p>
-          )}
-          {tokenId && (
-            <p className="response">
-              Token minted successfully! Token ID: {web3.utils.hexToNumberString(tokenId)}
-            </p>
-          )}
+        <div className="response-container">
+            {cid && (
+              <p className="response">
+                File uploaded successfully! CID: {cid}
+              </p>
+            )}
+            {tokenId && (
+              <p className="response">
+                Token minted successfully! Token ID: {web3.utils.hexToNumberString(tokenId)}
+              </p>
+            )}
 
-          <br>
-          </br>
+            <br>
+            </br>
 
-          <p id = "status">
-            {status}
-          </p>
-        </div>
+            <p id = "status">
+              {status}
+            </p>
+          </div>
+      </div>
     </div>
   );
 };
