@@ -66,7 +66,6 @@ function dataURItoBlob(dataURI) {
 
 // main function starts
 const FileUploader = () => {
-
   const [status, setStatus] = useState('');
   const [account, setAccount] = useState('');
   const [cid, setCID] = useState('');
